@@ -1,7 +1,7 @@
 import React from 'react';
 import Board from './Board';
 import Menu from './Menu';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {HashRouter, Route, Switch} from 'react-router-dom';
 
 class Game extends React.Component {
   constructor(props){
@@ -20,7 +20,7 @@ class Game extends React.Component {
 
   render() {
     return (
-      <BrowserRouter>
+      <HashRouter>
       <div className="game">
         <div className="game-board">
         <Switch>
@@ -33,7 +33,7 @@ class Game extends React.Component {
         </Switch>
         </div>
       </div>
-      </BrowserRouter>
+      </HashRouter>
     );
   }
 }
