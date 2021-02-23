@@ -1,39 +1,59 @@
 import React from 'react';
 import Board from './Board';
 import Menu from './Menu';
-import {HashRouter, Route, Switch} from 'react-router-dom';
+import { getData } from './../localStorageUtil';
 
 class Game extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      isMenu: false
+      isMenu: true,
+      continue:false
     }
     this.handleClick = (link)=>{
-      this.setState((st)=>{
-          return {...st, isMenu: !st.isMenu}
+      if(link === 'newGame') {
+        this.setState((st)=>{
+          return {
+            isMenu: false,
+            continue:false
+          }
       })
+      }
+      else if(link === 'continue') {
+        this.setState((st)=>{
+          return {
+            isMenu: false,
+            continue:true
+          }
+      })
+      }
+      else if(link === 'menu') {
+        this.setState((st)=>{
+          return {
+            isMenu: true,
+            continue:false
+          }
+      })
+      }
+      
   }
   
  
 }
 
   render() {
+    
     return (
-      <HashRouter>
+      
       <div className="game">
         <div className="game-board">
-        <Switch>
-          <Route exact path="/">
-            <Menu />
-          </Route>
-          <Route path="/game">
-            <Board />
-          </Route>
-        </Switch>
+
+       {this.state.isMenu ? <Menu handler={this.handleClick}/> : this.state.continue ? <Board handler={this.handleClick} save={getData('saveGame')}/> : <Board handler={this.handleClick}/>}
+            
         </div>
       </div>
-      </HashRouter>
+      
+
     );
   }
 }
