@@ -4,13 +4,13 @@ import { getData } from './../localStorageUtil';
 function Menu (props){
     return (
       <ul className='menu'>
-        <li className='menu-item' onClick={()=>props.handler('newGame')}>
+        <li className='menu-item' onClick={()=>props.changeLink('newGame')}>
           New Game
         </li>
-        <li className={getData('saveGame') ? 'menu-item': 'menu-item menu-item--disabled'} onClick={()=>props.handler('continue')}>
+        <li className={getData('saveGame') ? 'menu-item': 'menu-item menu-item--disabled'} onClick={()=>props.changeLink('continue')}>
           Continue
         </li>
-        <li className='menu-item'>
+        <li className='menu-item' onClick={()=>props.changeLink('settings')}> 
           Settings
         </li>
       </ul>

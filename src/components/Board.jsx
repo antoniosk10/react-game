@@ -1,16 +1,18 @@
 import React from 'react';
 import Square from './Square';
 import { setData } from './../localStorageUtil';
+import audio from '../assets/sounds/step.mp3';
 
 class Board extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props.save);
     this.state = props.save || {
       squares: Array(9).fill(null),
       xIsNext:true,
       mode:'pvp',
     }
+    this.disableBoard = false;
+    this.audio = new Audio(audio);
   }
 
   calculateWinner(squares) {
@@ -39,26 +41,30 @@ class Board extends React.Component {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X':'O';
+    this.playAudio();
     this.setState({
       squares:squares,
       xIsNext:!this.state.xIsNext,
     });
   }
 
+  playAudio() {
+    if(this.props.sound) {
+      this.audio.play();
+    }
+  }
+
   handleClickPVSPC(i) {
     const squares = this.state.squares.slice();
-    const arrEmpty = [];
-    if (this.calculateWinner(squares) || squares[i]) {
+   
+    if (this.calculateWinner(squares) || squares[i] || this.disableBoard) {
       return;
     }
     squares[i] = 'X';
-    squares.forEach((el,index)=>{
-      if(!el) {
-        arrEmpty.push(index);
-      }
-    
-    });
-    squares[arrEmpty[Math.floor(Math.random() * arrEmpty.length)]] = 'O';
+   
+    this.disableBoard = true;
+   
+    this.playAudio();
     this.setState({
       squares:squares,
       xIsNext:!this.state.xIsNext,
@@ -99,6 +105,35 @@ class Board extends React.Component {
     setData('saveGame',this.state);
   }
 
+  componentDidUpdate() {
+    if(!this.state.xIsNext && !this.calculateWinner(this.state.squares) && this.state.mode === 'pvspc') {
+      this.computerStep();
+    }
+  }
+
+  computerStep() {
+    const arrEmpty = [];
+    const squares = this.state.squares.slice();
+
+    squares.forEach((el,index)=>{
+      if(!el) {
+        arrEmpty.push(index);
+      }
+    
+    });
+
+    setTimeout(()=>{
+      squares[arrEmpty[Math.floor(Math.random() * arrEmpty.length)]] = 'O';
+      this.audio.play();
+      this.setState({
+        squares:squares,
+        xIsNext:!this.state.xIsNext,
+      });
+      this.disableBoard = false;
+    }
+    ,1000);
+  }
+
   render() {
     const winner = this.calculateWinner(this.state.squares);
     let status;
@@ -122,7 +157,7 @@ class Board extends React.Component {
           </label>
         </div>
         <div className="status">{status}</div>
-      
+      <div className="board-wrap">
           <div className="board-row">
             {this.renderSquare(0)}
             {this.renderSquare(1)}
@@ -138,9 +173,13 @@ class Board extends React.Component {
             {this.renderSquare(7)}
             {this.renderSquare(8)}
           </div>
+          <div className={winner ? "board-result board-result--visible":"board-result"}>
+            {status}
+            <button className="board-result-btn" onClick={()=>this.resetGame()}>New Game</button>
+          </div>
+          </div>
        <div className='buttons-block'>
-         
-          <button className='button' onClick={()=>this.props.handler('menu')}>Menu</button>
+          <button className='button' onClick={()=>this.props.changeLink('menu')}>Menu</button>
           <button className='button' onClick={()=>this.saveGame()}>Save Game</button>
           <button className='button' onClick={()=>this.resetGame()}>Reset</button>
        </div>
