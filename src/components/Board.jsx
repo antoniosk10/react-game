@@ -50,6 +50,7 @@ class Board extends React.Component {
 
   playAudio() {
     if(this.props.sound) {
+      this.audio.currentTime = 0;
       this.audio.play();
     }
   }
@@ -82,7 +83,9 @@ class Board extends React.Component {
           else {
             this.handleClickPVSPC(i);
           }
-        }}/>
+        }}
+        colorFigure={this.props.colorFigure}
+        colorBoard={this.props.colorBoard}/>
       );
   }
 
@@ -95,6 +98,7 @@ class Board extends React.Component {
   }
 
   resetGame() {
+    this.disableBoard = false;
     this.setState({
       squares: Array(9).fill(null),
       xIsNext:true,
