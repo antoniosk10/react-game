@@ -2,7 +2,7 @@ import React from 'react';
 import Board from './Board';
 import Menu from './Menu';
 import Settings from './Settings';
-import { getData } from './../localStorageUtil';
+import { getData, setData } from './../localStorageUtil';
 import audio from '../assets/sounds/music.mp3';
 
 class Game extends React.Component {
@@ -11,24 +11,35 @@ class Game extends React.Component {
     this.state = {
       link: 'menu',
       continue:false,
-      sound:true,
-      music:false,
-      colorFigure:'#000',
-      colorBoard:'#fff'
+      settings: getData('settingsGame') || {
+        sound:true,
+        music:false,
+        colorFigure:'#000000',
+        colorBoard:'#ffffff',
+        volumeSound:1,
+        volumeMusic:1,
+        timeForStep:'infinity'
+      }
     }
     this.audio = new Audio(audio);
-    
+    this.init();
+}
+
+init() {
+  this.audio.addEventListener('ended',()=>{
+    this.audio.play();
+  }); 
 }
 
 componentDidUpdate() {
-  if(this.state.music) {
-    this.audio.currentTime = 0;
+  this.audio.volume = this.state.settings.volumeMusic;
+  if(this.state.settings.music) {
     this.audio.play();
   }
   else {
     this.audio.pause();
   }
-  
+  setData('settingsGame',this.state.settings);
 }
 
 changeLink = (link)=>{
@@ -36,29 +47,76 @@ changeLink = (link)=>{
 }
 
 toggleSound = ()=>{
-  this.setState((state)=>({sound:!state.sound}));
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        sound: !prevState.settings.sound       
+    }
+}));
 }
 
 toggleMusic = ()=>{
-  this.setState((state)=>({music:!state.music}));
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        music: !prevState.settings.music       
+    }
+}));
 }
 
 toggleColorFigure = (color)=>{
-  this.setState({colorFigure:color});
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        colorFigure:color  
+    }
+}));
 }
 
 toggleColorBoard = (color)=>{
-  this.setState({colorBoard:color});
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        colorBoard:color  
+    }
+}));
+}
+
+toggleVolumeSound = (value)=>{
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        volumeSound:value  
+    }
+}));
+}
+
+toggleVolumeMusic = (value)=>{
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        volumeMusic:value  
+    }
+}));
+}
+
+toggleTimeForStep = (value)=>{
+  this.setState(prevState => ({
+    settings: {                   
+        ...prevState.settings,   
+        timeForStep:value  
+    }
+}));
 }
 
 renderSwitch(link) {
   switch(link) {
     case 'newGame':
-      return <Board changeLink={this.changeLink} sound={this.state.sound} colorFigure={this.state.colorFigure} colorBoard={this.state.colorBoard}/>;
+      return <Board changeLink={this.changeLink} settings={this.state.settings}/>;
     case 'continue':
-      return <Board changeLink={this.changeLink} save={getData('saveGame')} sound={this.state.sound} colorFigure={this.state.colorFigure} colorBoard={this.state.colorBoard}/>;
+      return <Board changeLink={this.changeLink} save={getData('saveGame')} settings={this.state.settings}/>;
     case 'settings':
-      return <Settings changeLink={this.changeLink} toggleSound={this.toggleSound} sound={this.state.sound} toggleMusic={this.toggleMusic} music={this.state.music} colorFigure={this.state.colorFigure} toggleColorFigure={this.toggleColorFigure} colorBoard={this.state.colorBoard} toggleColorBoard={this.toggleColorBoard}/>;
+      return <Settings changeLink={this.changeLink} settings={this.state.settings} toggleSound={this.toggleSound} toggleMusic={this.toggleMusic} toggleColorFigure={this.toggleColorFigure} toggleColorBoard={this.toggleColorBoard} toggleVolumeSound={this.toggleVolumeSound} toggleVolumeMusic={this.toggleVolumeMusic} toggleTimeForStep={this.toggleTimeForStep}/>;
     case 'menu':
       return <Menu changeLink={this.changeLink}/>;
     default:

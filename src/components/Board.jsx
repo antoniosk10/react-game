@@ -1,7 +1,8 @@
 import React from 'react';
 import Square from './Square';
-import { setData } from './../localStorageUtil';
-import audio from '../assets/sounds/step.mp3';
+import { setData, getData } from './../localStorageUtil';
+import audioStep from '../assets/sounds/step.mp3';
+import audioError from '../assets/sounds/error.mp3';
 
 class Board extends React.Component {
   constructor(props) {
@@ -12,7 +13,11 @@ class Board extends React.Component {
       mode:'pvp',
     }
     this.disableBoard = false;
-    this.audio = new Audio(audio);
+    this.audioStep = new Audio(audioStep);
+    this.audioError = new Audio(audioError);
+    this.audioStep.volume = this.props.settings.volumeSound;
+    this.audioError.volume = this.props.settings.volumeSound;
+    this.timeForStep = +this.props.settings.timeForStep;
   }
 
   calculateWinner(squares) {
@@ -32,26 +37,33 @@ class Board extends React.Component {
         return squares[a];
       }
     }
-    return null;
+    return squares.some((el)=>el === null) ? null : 'draw';
   }
 
   handleClickPVP(i) {
     const squares = this.state.squares.slice();
     if (this.calculateWinner(squares) || squares[i]) {
+      this.playAudio('error');
       return;
     }
     squares[i] = this.state.xIsNext ? 'X':'O';
-    this.playAudio();
+    this.playAudio('step');
     this.setState({
       squares:squares,
       xIsNext:!this.state.xIsNext,
     });
   }
 
-  playAudio() {
-    if(this.props.sound) {
-      this.audio.currentTime = 0;
-      this.audio.play();
+  playAudio(type) {
+    if(this.props.settings.sound) {
+      if(type==='step') {
+        this.audioStep.currentTime = 0;
+        this.audioStep.play();
+      }
+      else {
+        this.audioError.currentTime = 0;
+        this.audioError.play();
+      }
     }
   }
 
@@ -59,13 +71,14 @@ class Board extends React.Component {
     const squares = this.state.squares.slice();
    
     if (this.calculateWinner(squares) || squares[i] || this.disableBoard) {
+      this.playAudio('error');
       return;
     }
     squares[i] = 'X';
    
     this.disableBoard = true;
    
-    this.playAudio();
+    this.playAudio('step');
     this.setState({
       squares:squares,
       xIsNext:!this.state.xIsNext,
@@ -84,12 +97,15 @@ class Board extends React.Component {
             this.handleClickPVSPC(i);
           }
         }}
-        colorFigure={this.props.colorFigure}
-        colorBoard={this.props.colorBoard}/>
+        colorFigure={this.props.settings.colorFigure}
+        colorBoard={this.props.settings.colorBoard}/>
       );
   }
 
   changeMode(value) {
+    this.disableBoard = false;
+    this.autoWinner = null;
+    this.winner = null;
     this.setState({
       squares: Array(9).fill(null),
       mode:value,
@@ -99,6 +115,8 @@ class Board extends React.Component {
 
   resetGame() {
     this.disableBoard = false;
+    this.autoWinner = null;
+    this.winner = null;
     this.setState({
       squares: Array(9).fill(null),
       xIsNext:true,
@@ -113,6 +131,18 @@ class Board extends React.Component {
     if(!this.state.xIsNext && !this.calculateWinner(this.state.squares) && this.state.mode === 'pvspc') {
       this.computerStep();
     }
+    clearTimeout(this.timer);
+    if(!isNaN(this.timeForStep) && !this.winner){
+      this.timer = setTimeout(() => {
+        this.autoWinner = this.state.xIsNext ? 'O':'X';
+        this.forceUpdate();
+      }, +this.props.settings.timeForStep);
+    }
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timer);
+    clearTimeout(this.stepPC);
   }
 
   computerStep() {
@@ -123,12 +153,11 @@ class Board extends React.Component {
       if(!el) {
         arrEmpty.push(index);
       }
-    
     });
 
-    setTimeout(()=>{
+    this.stepPC = setTimeout(()=>{
       squares[arrEmpty[Math.floor(Math.random() * arrEmpty.length)]] = 'O';
-      this.audio.play();
+      this.playAudio('step');
       this.setState({
         squares:squares,
         xIsNext:!this.state.xIsNext,
@@ -138,16 +167,39 @@ class Board extends React.Component {
     ,1000);
   }
 
+  changeStatistics(mode,winner) {
+    const statistics = getData('statisticsGame') || {
+      pvp: {
+        X:0,
+        O:0,
+        draw:0
+      },
+      pvspc:{
+        X:0,
+        O:0,
+        draw:0
+      }
+    };
+    statistics[mode][winner] += 1;
+    setData('statisticsGame',statistics);
+  }
+
   render() {
-    const winner = this.calculateWinner(this.state.squares);
+    this.winner = this.autoWinner || this.calculateWinner(this.state.squares);
     let status;
-    if(winner) {
-      status = `Выиграл ${winner}`
+    if(this.winner) {
+      if(this.winner === 'draw') {
+        status = `Draw`;
+      }
+      else {
+        status = `${this.winner} Wins`
+      }
+      this.changeStatistics(this.state.mode,this.winner);
     }
     else {
       status = `Next player: ${this.state.xIsNext ? 'X':'O'}`;
     }
-   
+    
     return (
       <div>
         <div className='choose-mode'>
@@ -177,7 +229,7 @@ class Board extends React.Component {
             {this.renderSquare(7)}
             {this.renderSquare(8)}
           </div>
-          <div className={winner ? "board-result board-result--visible":"board-result"}>
+          <div className={this.winner ? "board-result board-result--visible":"board-result"}>
             {status}
             <button className="board-result-btn" onClick={()=>this.resetGame()}>New Game</button>
           </div>

@@ -6,7 +6,7 @@ function Square (props){
     background: props.colorBoard,
   };
     return (
-      <button className="square" style={style} onClick={props.onClick}>
+      <button className={props.value ? 'square square--fill':'square'} style={style} onClick={props.onClick}>
         {props.value}
       </button>
     );

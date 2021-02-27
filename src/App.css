@@ -55,7 +55,11 @@ a:hover {
 }
 
 .square:hover {
-  background: rgb(211, 211, 211);
+  background: rgb(25, 224, 68)!important;
+}
+
+.square--fill.square:hover {
+  background: rgb(179, 11, 39)!important;
 }
 
 .square:focus {
@@ -153,8 +157,32 @@ a:hover {
 }
 
 .board-result-btn {
+  width: 50%;
   margin-top: 10px;
   cursor: pointer;
+}
+
+button {
+  padding: 10px 0;
+  width: 100%;
+  cursor: pointer;
+}
+
+.setting-item-title {
+  display: block;
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.setting-title {
+  text-align: center;
 }
 
 @media(max-width:360px) {
