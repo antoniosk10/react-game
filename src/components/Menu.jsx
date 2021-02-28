@@ -13,6 +13,9 @@ function Menu (props){
         <li className='menu-item' onClick={()=>props.changeLink('settings')}> 
           Settings
         </li>
+        <li className='menu-item' onClick={()=>props.changeLink('statistics')}> 
+          Statistics
+        </li>
       </ul>
     );
 }

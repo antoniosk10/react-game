@@ -2,8 +2,10 @@ import React from 'react';
 import Board from './Board';
 import Menu from './Menu';
 import Settings from './Settings';
+import Statistics from './Statistics';
 import { getData, setData } from './../localStorageUtil';
 import audio from '../assets/sounds/music.mp3';
+import logo from './../assets/image/rss.svg'
 
 class Game extends React.Component {
   constructor(props){
@@ -119,6 +121,8 @@ renderSwitch(link) {
       return <Settings changeLink={this.changeLink} settings={this.state.settings} toggleSound={this.toggleSound} toggleMusic={this.toggleMusic} toggleColorFigure={this.toggleColorFigure} toggleColorBoard={this.toggleColorBoard} toggleVolumeSound={this.toggleVolumeSound} toggleVolumeMusic={this.toggleVolumeMusic} toggleTimeForStep={this.toggleTimeForStep}/>;
     case 'menu':
       return <Menu changeLink={this.changeLink}/>;
+    case 'statistics':
+        return <Statistics changeLink={this.changeLink}/>;
     default:
       return null;
   }
@@ -131,6 +135,10 @@ renderSwitch(link) {
         <div className="game-board">
           {this.renderSwitch(this.state.link)}
         </div>
+        <footer>
+         <p>Created by <a href="https://github.com/antoniosk10">Anton Skorobogaty</a> / 03.03.2021</p>
+         <a href="https://rs.school/react/" className='logo'><img src={logo} alt="rss"/></a>
+        </footer>
       </div>
     );
   }

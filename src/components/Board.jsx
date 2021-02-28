@@ -3,6 +3,7 @@ import Square from './Square';
 import { setData, getData } from './../localStorageUtil';
 import audioStep from '../assets/sounds/step.mp3';
 import audioError from '../assets/sounds/error.mp3';
+import { DEFAULT_STATISTICS, WIN_COMBINATION } from '../DefaultValues'
 
 class Board extends React.Component {
   constructor(props) {
@@ -21,16 +22,7 @@ class Board extends React.Component {
   }
 
   calculateWinner(squares) {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
+    const lines = WIN_COMBINATION.slice();
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
@@ -148,15 +140,28 @@ class Board extends React.Component {
   computerStep() {
     const arrEmpty = [];
     const squares = this.state.squares.slice();
-
-    squares.forEach((el,index)=>{
-      if(!el) {
-        arrEmpty.push(index);
-      }
-    });
+    const lines = WIN_COMBINATION.slice();
+    let step;
+    const findX = this.findWinPosition(lines,'X');
+    const findO = this.findWinPosition(lines,'O');
+    if(findO !== null) {
+      step = findO;
+    }
+    else if(findX !== null) {
+      step = findX;
+    }
+    else {
+      squares.forEach((el,index)=>{
+        if(!el) {
+          arrEmpty.push(index);
+        }
+      });
+      step = arrEmpty[Math.floor(Math.random() * arrEmpty.length)];
+    }
+    
 
     this.stepPC = setTimeout(()=>{
-      squares[arrEmpty[Math.floor(Math.random() * arrEmpty.length)]] = 'O';
+      squares[step] = 'O';
       this.playAudio('step');
       this.setState({
         squares:squares,
@@ -167,25 +172,31 @@ class Board extends React.Component {
     ,1000);
   }
 
+  findWinPosition(lines,figure) {
+    for(let i = 0; i < lines.length; i++) { 
+      if(lines[i].reduce((acum,el)=>{
+        return this.state.squares[el] === figure ? acum + 1 : acum;
+       },0) === 2) {
+         for(let j = 0; j < lines[i].length; j++) {
+           if(this.state.squares[lines[i][j]] === null) {
+             return lines[i][j];
+           }
+         }
+       }
+    }
+    return null;
+  }
+
   changeStatistics(mode,winner) {
-    const statistics = getData('statisticsGame') || {
-      pvp: {
-        X:0,
-        O:0,
-        draw:0
-      },
-      pvspc:{
-        X:0,
-        O:0,
-        draw:0
-      }
-    };
+    const statistics = getData('statisticsGame') || DEFAULT_STATISTICS;
     statistics[mode][winner] += 1;
     setData('statisticsGame',statistics);
   }
 
   render() {
+    
     this.winner = this.autoWinner || this.calculateWinner(this.state.squares);
+    console.log(this.winner);
     let status;
     if(this.winner) {
       if(this.winner === 'draw') {
