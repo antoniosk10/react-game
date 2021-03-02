@@ -2,6 +2,7 @@ import React from 'react';
 import Board from './Board';
 import Menu from './Menu';
 import Settings from './Settings';
+import ShortcutKeys from './ShortcutKeys';
 import Statistics from './Statistics';
 import { getData, setData } from './../localStorageUtil';
 import audio from '../assets/sounds/music.mp3';
@@ -31,6 +32,37 @@ init() {
   this.audio.addEventListener('ended',()=>{
     this.audio.play();
   }); 
+  document.addEventListener('keyup',(e)=>{
+    switch(e.key) {
+      case 'Backspace' : {
+        this.changeLink('menu');
+        break;
+      }
+      case '1' : {
+        this.changeLink('newGame');
+        break;
+      }
+      case '2' : {
+        if(this.state.continue) {
+          this.changeLink('continue');
+        }
+        break;
+      }
+      case '3' : {
+        this.changeLink('settings');
+        break;
+      }
+      case '4' : {
+        this.changeLink('statistics');
+        break;
+      }
+      case '5' : {
+        this.changeLink('shortcutKeys');
+        break;
+      }
+      default : break;
+    }
+  });
 }
 
 componentDidUpdate() {
@@ -123,6 +155,8 @@ renderSwitch(link) {
       return <Menu changeLink={this.changeLink}/>;
     case 'statistics':
         return <Statistics changeLink={this.changeLink}/>;
+    case 'shortcutKeys':
+        return <ShortcutKeys changeLink={this.changeLink}/>;
     default:
       return null;
   }

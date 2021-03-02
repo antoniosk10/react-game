@@ -85,8 +85,11 @@ class Board extends React.Component {
           if(this.state.mode === 'pvp') {
             this.handleClickPVP(i);
           }
-          else {
+          else  if(this.state.mode === 'pvspc'){
             this.handleClickPVSPC(i);
+          }
+          else {
+            this.playAudio('error');
           }
         }}
         colorFigure={this.props.settings.colorFigure}
@@ -121,6 +124,10 @@ class Board extends React.Component {
 
   componentDidUpdate() {
     if(!this.state.xIsNext && !this.calculateWinner(this.state.squares) && this.state.mode === 'pvspc') {
+      this.computerStep();
+    }
+    if(!this.calculateWinner(this.state.squares) && this.state.mode === 'pcvpc') {
+      this.disableBoard = true;
       this.computerStep();
     }
     clearTimeout(this.timer);
@@ -161,7 +168,7 @@ class Board extends React.Component {
     
 
     this.stepPC = setTimeout(()=>{
-      squares[step] = 'O';
+      squares[step] = this.state.xIsNext ? 'X':'O';
       this.playAudio('step');
       this.setState({
         squares:squares,
@@ -194,9 +201,7 @@ class Board extends React.Component {
   }
 
   render() {
-    
     this.winner = this.autoWinner || this.calculateWinner(this.state.squares);
-    console.log(this.winner);
     let status;
     if(this.winner) {
       if(this.winner === 'draw') {
@@ -219,12 +224,16 @@ class Board extends React.Component {
             Player VS Player
           </label>
           <label className='choose-mode-item'>
-            <input type="radio" name='mode' value='pvspc' defaultChecked={this.state.mode === 'pvp' ? false : true} onChange={(e)=>this.changeMode(e.target.value)}/>
+            <input type="radio" name='mode' value='pvspc' defaultChecked={this.state.mode === 'pvspc' ? true : false} onChange={(e)=>this.changeMode(e.target.value)}/>
            Player VS PC
+          </label>
+          <label className='choose-mode-item'>
+            <input type="radio" name='mode' value='pcvpc' defaultChecked={this.state.mode === 'pcvpc' ? true : false} onChange={(e)=>this.changeMode(e.target.value)}/>
+           PC VS PC
           </label>
         </div>
         <div className="status">{status}</div>
-      <div className="board-wrap">
+      <div className={this.state.mode === 'pcvpc' ? 'board-wrap board-wrap--disable' : 'board-wrap'}>
           <div className="board-row">
             {this.renderSquare(0)}
             {this.renderSquare(1)}

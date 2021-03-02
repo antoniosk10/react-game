@@ -16,6 +16,9 @@ function Menu (props){
         <li className='menu-item' onClick={()=>props.changeLink('statistics')}> 
           Statistics
         </li>
+        <li className='menu-item' onClick={()=>props.changeLink('shortcutKeys')}> 
+          Shortcut keys
+        </li>
       </ul>
     );
 }

@@ -26,6 +26,9 @@ function Statistics (props){
           <th>
             Player(X) VS PC(O)
           </th>
+          <th>
+            PC VS PC
+          </th>
         </tr>
         </thead>
         <tbody>
@@ -39,6 +42,9 @@ function Statistics (props){
           <td>
               {data.pvspc.X}
           </td>
+          <td>
+              {data.pcvpc.X}
+          </td>
         </tr>
         <tr>
           <td>
@@ -50,6 +56,9 @@ function Statistics (props){
           <td>
               {data.pvspc.O}
           </td>
+          <td>
+              {data.pcvpc.O}
+          </td>
         </tr>
         <tr>
           <td>
@@ -60,6 +69,9 @@ function Statistics (props){
           </td>
           <td>
               {data.pvspc.draw}
+          </td>
+          <td>
+              {data.pcvpc.draw}
           </td>
         </tr>
         </tbody>

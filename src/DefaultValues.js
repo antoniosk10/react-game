@@ -8,6 +8,11 @@ export const DEFAULT_STATISTICS = {
     X:0,
     O:0,
     draw:0
+  },
+  pcvpc:{
+    X:0,
+    O:0,
+    draw:0
   }
 };
 
